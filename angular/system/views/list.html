@@ -7,16 +7,23 @@
             <button
                 type="button"
                 ng-click="openCreateModal()"
-                class="inline-flex items-center justify-center rounded-[3px] bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="inline-flex items-center justify-center gap-1.5 rounded-[3px] bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
+               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                   <path d="M12 5v14"></path>
+                   <path d="M5 12h14"></path>
+               </svg>
                បង្កើតទិន្នន័យ
             </button>
-            <input
-                type="text"
-                ng-model="searchText"
-                placeholder="ស្វែងរកទិន្នន័យ"
-                class="w-full sm:w-72 rounded-[3px] border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
+            <div class="relative w-full sm:w-72">
+                <i data-lucide="search" class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
+                <input
+                    type="text"
+                    ng-model="searchText"
+                    placeholder="ស្វែងរកទិន្នន័យ"
+                    class="w-full rounded-[3px] border border-gray-300 pl-9 pr-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+            </div>
         </div>
     </div>
 
@@ -38,7 +45,12 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-                <tr ng-repeat="emp in getPaginatedEmployees() track by emp.id" class="hover:bg-gray-50">
+                <tr
+                    ng-repeat="emp in getPaginatedEmployees() track by emp.id"
+                    ng-click="openDetailModal(emp)"
+                    class="hover:bg-gray-50 cursor-pointer"
+                    title="ចុចដើម្បីមើលលម្អិត"
+                >
                     <td class="px-5 py-3 text-gray-700">{{emp.id}}</td>
                      <td class="px-5 py-3 font-medium text-gray-800">
                         <img
@@ -60,13 +72,14 @@
                     <td class="px-5 py-3 font-medium text-gray-800">{{emp.description}}</td>
                     <td class="px-5 py-3">
                         <button
-                            ng-click="deleteEmployee(emp.id)"
+                            ng-click="$event.stopPropagation(); deleteEmployee(emp.id)"
                             class="inline-flex items-center rounded-[3px] bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                         >
                            លុប
                         </button>
                         <button
-                            ng-click="openEditModal(emp)"
+                            type="button"
+                            ng-click="$event.preventDefault(); $event.stopPropagation(); openEditModal(emp)"
                             class="inline-flex items-center rounded-[3px] bg-yellow-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1"
                         >
                            កែប្រែ
@@ -268,5 +281,71 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+<div
+    ng-if="showDetailModal && selectedEmployee"
+    ng-click="closeDetailModal()"
+    class="fixed inset-0 z-[1300] bg-black/40 flex items-center justify-center p-4"
+>
+    <div
+        ng-click="$event.stopPropagation()"
+        class="w-full max-w-3xl bg-white rounded-[5px] shadow-xl border border-gray-200"
+    >
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-800">ព័ត៌មានលម្អិតបុគ្គលិក</h3>
+            <button
+                type="button"
+                ng-click="closeDetailModal()"
+                class="text-gray-500 hover:text-gray-700 text-xl leading-none"
+            >
+                &times;
+            </button>
+        </div>
+
+        <div class="p-5 space-y-4">
+            <div class="rounded-[5px] border border-gray-100 bg-gray-50 px-4 py-5">
+                <img
+                    ng-if="getImageUrl(selectedEmployee.image)"
+                    ng-src="{{getImageUrl(selectedEmployee.image)}}"
+                    alt="Employee image"
+                    class="h-24 w-24 rounded-[5px] object-cover border border-gray-200 mx-auto"
+                >
+                <div ng-if="!getImageUrl(selectedEmployee.image)" class="h-24 w-24 rounded-[5px] border border-gray-200 bg-white flex items-center justify-center text-xs text-gray-400 mx-auto">
+                    គ្មានរូបភាព
+                </div>
+                <div class="min-w-0 mt-3 text-center">
+                    <p class="text-lg font-semibold text-gray-800">{{selectedEmployee.fullname || '-'}}</p>
+                    <p class="text-sm text-gray-500">ID: {{selectedEmployee.id || '-'}}</p>
+                    <p class="text-sm text-gray-500">{{selectedEmployee.position || '-'}}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <div class="rounded-[3px] border border-gray-200 px-3 py-2"><span class="text-gray-500">អាយុ៖ </span><span class="text-gray-800">{{selectedEmployee.age || '-'}}</span></div>
+                <div class="rounded-[3px] border border-gray-200 px-3 py-2"><span class="text-gray-500">ថ្ងៃខែឆ្នាំកំណើត៖ </span><span class="text-gray-800">{{selectedEmployee.birth || '-'}}</span></div>
+                <div class="rounded-[3px] border border-gray-200 px-3 py-2"><span class="text-gray-500">អ៊ីម៉ែល៖ </span><span class="text-gray-800">{{selectedEmployee.email || '-'}}</span></div>
+                <div class="rounded-[3px] border border-gray-200 px-3 py-2"><span class="text-gray-500">ផ្នែក៖ </span><span class="text-gray-800">{{selectedEmployee.department || '-'}}</span></div>
+                <div class="rounded-[3px] border border-gray-200 px-3 py-2 md:col-span-2"><span class="text-gray-500">អាសយដ្ឋាន៖ </span><span class="text-gray-800">{{selectedEmployee.address || '-'}}</span></div>
+                <div class="rounded-[3px] border border-gray-200 px-3 py-2 md:col-span-2"><span class="text-gray-500">មតិបន្ថែម៖ </span><span class="text-gray-800">{{selectedEmployee.description || '-'}}</span></div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button
+                    type="button"
+                    ng-click="closeDetailModal()"
+                    class="rounded-[3px] border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                    បិទ
+                </button>
+                <button
+                    type="button"
+                    ng-click="openEditModal(selectedEmployee)"
+                    class="rounded-[3px] bg-yellow-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                    កែប្រែទិន្នន័យ
+                </button>
+            </div>
+        </div>
     </div>
 </div>

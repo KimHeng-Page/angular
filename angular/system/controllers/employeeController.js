@@ -1,4 +1,4 @@
-﻿app.controller("EmployeeController", function($scope, $location, $filter, $window, EmployeeService){
+app.controller("EmployeeController", function($scope, $location, $filter, $window, $timeout, EmployeeService){
 
     $scope.employees = [];
     $scope.newEmployee = createEmptyEmployee();
@@ -6,9 +6,19 @@
     $scope.pageSize = 8;
     $scope.filteredEmployees = [];
     $scope.showCreateModal = false;
+    $scope.showDetailModal = false;
+    $scope.selectedEmployee = null;
     $scope.isEditMode = false;
     $scope.editEmployeeId = null;
     $scope.createError = "";
+
+    function renderLucideIcons(){
+        $timeout(function(){
+            if ($window.lucide && typeof $window.lucide.createIcons === "function") {
+                $window.lucide.createIcons();
+            }
+        }, 0);
+    }
 
     function createEmptyEmployee(){
         return {
@@ -33,6 +43,11 @@
     };
 
     $scope.openEditModal = function(emp){
+        if (!emp) {
+            return;
+        }
+        $scope.showDetailModal = false;
+        $scope.selectedEmployee = null;
         $scope.newEmployee = angular.copy(emp);
         $scope.newEmployee.imageFile = null;
         $scope.isEditMode = true;
@@ -47,6 +62,19 @@
         $scope.isEditMode = false;
         $scope.editEmployeeId = null;
         $scope.createError = "";
+    };
+
+    $scope.openDetailModal = function(emp){
+        if (!emp) {
+            return;
+        }
+        $scope.selectedEmployee = angular.copy(emp);
+        $scope.showDetailModal = true;
+    };
+
+    $scope.closeDetailModal = function(){
+        $scope.showDetailModal = false;
+        $scope.selectedEmployee = null;
     };
 
     function refreshFilteredEmployees(){
@@ -126,6 +154,7 @@
     }
 
     loadEmployees();
+    renderLucideIcons();
 
     $scope.$watch("searchText", function(){
         $scope.currentPage = 1;
@@ -204,4 +233,3 @@
     };
 
 });
-
