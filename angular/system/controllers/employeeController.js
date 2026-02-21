@@ -1,9 +1,9 @@
-﻿app.controller("EmployeeController", function($scope, $location, $filter, EmployeeService){
+﻿app.controller("EmployeeController", function($scope, $location, $filter, $window, EmployeeService){
 
     $scope.employees = [];
     $scope.newEmployee = createEmptyEmployee();
     $scope.currentPage = 1;
-    $scope.pageSize = 10;
+    $scope.pageSize = 8;
     $scope.filteredEmployees = [];
     $scope.showCreateModal = false;
     $scope.isEditMode = false;
@@ -185,10 +185,23 @@
     };
 
     $scope.deleteEmployee = function(id){
+        var confirmed = $window.confirm("តើអ្នកប្រាកដថាចង់លុបទិន្នន័យនេះមែនទេ?");
+        if (!confirmed) {
+            return;
+        }
+
         EmployeeService.delete(id)
         .then(function(){
-            loadEmployees();
+            return loadEmployees();
+        })
+        .then(function(){
+            $window.alert("លុបទិន្នន័យបានជោគជ័យ");
+        })
+        .catch(function(error){
+            var message = (error && error.data && error.data.message) ? error.data.message : "លុបទិន្នន័យមិនបានជោគជ័យ";
+            $window.alert(message);
         });
     };
 
 });
+

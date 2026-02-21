@@ -98,7 +98,7 @@
                 type="button"
                 ng-repeat="page in getPageNumbers() track by page"
                 ng-click="goToPage(page)"
-                ng-class="{'bg-blue-600 text-white border-blue-600 hover:bg-blue-600': currentPage === page}"
+                ng-class="{'bg-gray-200 text-white border-gray-200 hover:bg-gray-400': currentPage === page}"
                 class="rounded-[3px] border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 min-w-9 font-bold"
             >
                 {{page}}

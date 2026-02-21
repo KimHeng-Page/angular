@@ -10,7 +10,7 @@ app.controller("EmployeeController", function($scope, EmployeeService){
     };
 
     $scope.deleteEmployee = function(index){
-        if (window.confirm("Do you want to delete this employee?")) {
+        if (window.confirm("តើអ្នកចង់លុបទិន្នន័យនេះមែនទេ?")) {
             EmployeeService.deleteEmployee(index);
         }
     };
