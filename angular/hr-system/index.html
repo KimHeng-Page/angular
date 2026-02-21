@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>HR System</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular-route.js"></script>
+
+    <script src="app.js"></script>
+    <script src="services/employeeService.js"></script>
+    <script src="controllers/employeeController.js"></script>
+</head>
+<body>
+
+    <h1>HR Management System</h1>
+
+    <a href="#/employees">Employee List</a> |
+    <a href="#/add">Add Employee</a>
+
+    <div ng-view></div>
+</body>
+</html>

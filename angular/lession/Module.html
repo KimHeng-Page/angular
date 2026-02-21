@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <title>Moudel and Controller</title>
+</head>
+<style>
+    body{
+        font-family: 'khmer OS Siemreap', sans-serif;
+    }
+</style>
+<body ng-controller="myData">
+     <h2>{{ message }}</h2>
+     <button ng-click="changeMessage()">Change</button>
+    
+     <script>
+        var app = angular.module("myApp",[]);
+            app.controller("myData", function($scope){
+                $scope.message = "welcome to angular 1.2";
+
+                $scope.changeMessage = function(){
+                    $scope.message = "message have change!";
+                }
+            });
+     </script>
+</body>
+</html>

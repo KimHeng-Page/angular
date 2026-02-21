@@ -1,0 +1,21 @@
+<h2 ng-if="editIndex == -1">Add Employee</h2>
+<h2 ng-if="editIndex != -1">Edit Employee</h2>
+
+<form name="empForm" ng-submit="editIndex == -1 ? addEmployee() : updateEmployee()">
+
+Name:
+<input type="text" ng-model="newEmployee.name" required>
+<span ng-show="empForm.$submitted && empForm.$invalid">
+    Name required
+</span>
+<br><br>
+
+Position:
+<input type="text" ng-model="newEmployee.position" required>
+<br><br>
+
+<button type="submit">
+    {{ editIndex == -1 ? 'Add' : 'Update' }}
+</button>
+
+</form>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <title>Derective</title>
+</head>
+<style>
+    body {
+        font-family: 'Khmer OS Siemreap', sans-serif;
+    }
+</style>
+<body ng-controller="myData">
+    <h2>Todo List</h2>
+    <input type="text" ng-model="newtask">
+    <button ng-click="addtask()">add</button>
+    <ul>
+        <li ng-repeat="task in tasks">
+            {{ task }}
+            <button ng-click="remove($index)">Delete</button>
+        </li>
+    </ul>
+    <script>
+        var app = angular.module("myApp", []);
+        app.controller("myData", function($scope){
+            $scope.tasks = [];
+
+            $scope.addtask = function(){
+                $scope.tasks.push($scope.newtask);
+                $scope.newtask = " ";
+            }
+
+            $scope.remove = function(index){
+                $scope.tasks.splice(index, 1);
+            };
+        });
+    </script>
+</body>
+</html>

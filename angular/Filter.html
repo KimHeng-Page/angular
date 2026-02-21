@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    <title>Filter Example</title>
+</head>
+<body>
+    <div ng-app="myApp" ng-controller="myData">
+        <p>{{ name | uppercase }}</p>
+        <p>{{ price | currency }}</p>
+        <p>{{ today | date:'yyyy-MM-dd' }}</p>
+    </div>
+    <script>
+        var app = angular.module("myApp", []);
+
+        app.controller("myData", function($scope){
+            $scope.name = "apple";
+            $scope.price = 1;
+            $scope.today = new Date();
+        })
+    </script>
+</body>
+</html>

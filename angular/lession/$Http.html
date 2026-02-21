@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <title>$http calling api</title>
+</head>
+<body ng-controller="myData">
+    <h2>Employee List</h2>
+    <ul>
+        <li ng-repeat="user in users">{{ user.id }} {{ user.name }} {{ user.position }}</li>
+    </ul>
+    <script>
+        var app = angular.module("myApp", []);
+
+        app.controller("myData", function($scope, $http){
+            $http.get("users.json")
+            .success(function(response){
+                $scope.users  = response;
+            });
+        });
+    </script>
+</body>
+</html>

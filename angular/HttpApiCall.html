@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <title>$http call API</title>
+</head>
+<body>
+    <div ng-app="myApp" ng-controller="myData">
+        <h3>Information of Staff</h3>
+        <ul>
+            <li ng-repeat="user in users">
+                {{ user.name }} {{ user.age }} {{ user.address }} {{ user.major }}
+            </li>
+        </ul>
+    </div>
+    <script>
+        var app = angular.module("myApp", []);
+        
+        app.controller("myData", function($scope, $http){
+            $http.get("users.json")
+            .success(function(response){
+                $scope.users = response;
+            });
+        });
+    </script>
+</body>
+</html>

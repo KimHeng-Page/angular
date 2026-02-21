@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <title>Format Data</title>
+</head>
+<style>
+    body{
+        font-family: 'Khmer OS Siemreap', sans-serif;
+    }
+</style>
+<body>
+    <div ng-app="myApp" ng-controller="myData">
+        <p>{{ name | uppercase }}</p>
+        <p>{{ salary | currency }}</p>
+        <p>{{ today | date:'yyyy-MM-dd' }}</p>
+    </div>
+    <script>
+        var app = angular.module("myApp", []);
+
+        app.controller("myData", function($scope){
+            $scope.name =  "Srun Kimheng";
+            $scope.salary = 500;
+            $scope.today = new Date();
+        });
+    </script>
+</body>
+</html>

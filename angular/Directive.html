@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <title>ng-repeat + ng-click</title>
+</head>
+<body ng-controller="myData">
+    <input type="text" ng-model="newItem">
+    <button ng-click="addItem()">save</button>
+    <ul>
+        <li ng-repeat="item in items">
+            {{item}}
+            <button ng-click="remove($index)">Delete</button>
+        </li>
+    </ul>
+    <script>
+        var app = angular.module("myApp", []);
+
+        app.controller("myData", function($scope){
+            $scope.items = ["apple", "banana"];
+
+            $scope.addItem = function(){
+                $scope.items.push($scope.newItem);
+                $scope.newItem = " ";
+            }
+
+            $scope.remove = function(index){
+                $scope.items.splice(index, 1);
+            };
+        });
+    </script>
+</body>
+</html>

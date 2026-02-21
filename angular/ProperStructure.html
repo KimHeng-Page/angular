@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
+    <title>Module + Controller + $scope</title>
+</head>
+<body ng-controller="myData">
+    <h2>{{ message }}</h2>
+    <script>
+        var data = angular.module("myApp", []);
+
+        data.controller("myData", function($scope){
+            $scope.message = "Welcome to angular javascript framework 1.2";
+        })
+    </script>
+</body>
+</html>
