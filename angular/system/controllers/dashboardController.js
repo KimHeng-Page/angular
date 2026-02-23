@@ -30,7 +30,8 @@
     var departmentChart = null;
     var positionChart = null;
     var slideTimer = null;
-        var welcomeSpeechGestureHandler = null;
+    var welcomeSpeechGestureHandler = null;
+    var welcomeAudio = null;
 
     function destroyCharts(){
         if (departmentChart) {
@@ -114,6 +115,10 @@
         }
     }
 
+    function buildWelcomeText(){
+        return "សូមស្វាគមន៍, " + getCurrentUserDisplayName();
+    }
+
     function clearWelcomeSpeechGestureHandler(){
         if (!welcomeSpeechGestureHandler || !$window.document) {
             return;
@@ -130,10 +135,8 @@
         }
 
         welcomeSpeechGestureHandler = function(){
-            var spoke = speakWelcomeText(text);
-            if (spoke) {
-                clearWelcomeSpeechGestureHandler();
-            }
+            clearWelcomeSpeechGestureHandler();
+            speakKhmerNow(text);
         };
 
         $window.document.addEventListener("click", welcomeSpeechGestureHandler, true);
@@ -141,27 +144,67 @@
         $window.document.addEventListener("keydown", welcomeSpeechGestureHandler, true);
     }
 
-    function speakWelcomeText(text, onBlocked){
+    function playKhmerAudioFallback(text){
+        try {
+            var message = String(text || "").trim();
+            if (!message || !$window.Audio) {
+                return false;
+            }
+
+            var ttsUrl = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=km&q=" + encodeURIComponent(message);
+            if (!welcomeAudio) {
+                welcomeAudio = new $window.Audio();
+                welcomeAudio.preload = "auto";
+            }
+
+            welcomeAudio.src = ttsUrl;
+            var playPromise = welcomeAudio.play();
+            if (playPromise && typeof playPromise.catch === "function") {
+                playPromise.catch(function(){
+                    queueWelcomeSpeechOnFirstGesture(message);
+                });
+            }
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function speakWelcomeText(text, onBlocked, attempt){
         try {
             if (!$window.speechSynthesis || !$window.SpeechSynthesisUtterance) {
                 return false;
             }
 
+            attempt = attempt || 0;
             var message = String(text || "").trim();
             if (!message) {
                 return false;
             }
 
             var synth = $window.speechSynthesis;
+            var voices = synth.getVoices();
+
+            if ((!voices || !voices.length) && attempt < 2) {
+                $timeout(function(){
+                    speakWelcomeText(message, onBlocked, attempt + 1);
+                }, 450, false);
+                return true;
+            }
+
             var utterance = new $window.SpeechSynthesisUtterance(message);
             var started = false;
+            var retried = false;
             utterance.rate = 1;
             utterance.pitch = 1;
-
-            var voices = synth.getVoices();
+            utterance.volume = 1;
             var khmerVoice = null;
+            var fallbackVoice = null;
             if (voices && voices.length) {
                 for (var i = 0; i < voices.length; i++) {
+                    if (!fallbackVoice) {
+                        fallbackVoice = voices[i];
+                    }
                     if (voices[i].lang && voices[i].lang.toLowerCase().indexOf("km") === 0) {
                         khmerVoice = voices[i];
                         break;
@@ -169,13 +212,15 @@
                 }
             }
 
-            if (khmerVoice) {
+            utterance.text = message;
+            if (attempt === 0 && khmerVoice) {
                 utterance.voice = khmerVoice;
                 utterance.lang = khmerVoice.lang || "km-KH";
-                utterance.text = message;
+            } else if (fallbackVoice) {
+                utterance.voice = fallbackVoice;
+                utterance.lang = fallbackVoice.lang || (($window.navigator && $window.navigator.language) || "en-US");
             } else {
-                utterance.lang = "en-US";
-                utterance.text = "Welcome " + getCurrentUserDisplayName();
+                utterance.lang = (($window.navigator && $window.navigator.language) || "en-US");
             }
 
             utterance.onstart = function(){
@@ -184,19 +229,36 @@
             };
 
             utterance.onerror = function(){
+                if (attempt < 2) {
+                    speakWelcomeText(message, onBlocked, attempt + 1);
+                    return;
+                }
                 if (typeof onBlocked === "function") {
                     onBlocked();
                 }
             };
 
+            if (typeof synth.resume === "function") {
+                synth.resume();
+            }
             synth.cancel();
             synth.speak(utterance);
 
             $timeout(function(){
-                if (!started && typeof onBlocked === "function") {
+                if (started || retried) {
+                    return;
+                }
+                retried = true;
+
+                if (attempt < 2) {
+                    speakWelcomeText(message, onBlocked, attempt + 1);
+                    return;
+                }
+
+                if (typeof onBlocked === "function") {
                     onBlocked();
                 }
-            }, 1200, false);
+            }, 1000, false);
 
             return true;
         } catch (e) {
@@ -204,8 +266,20 @@
         }
     }
 
+    function speakKhmerNow(text){
+        if (!speakWelcomeText(text, function(){
+            if (!playKhmerAudioFallback(text)) {
+                queueWelcomeSpeechOnFirstGesture(text);
+            }
+        })) {
+            if (!playKhmerAudioFallback(text)) {
+                queueWelcomeSpeechOnFirstGesture(text);
+            }
+        }
+    }
+
     function showLoginWelcomeOnce(){
-        var welcomeText = "សូមស្វាគមន៍, " + getCurrentUserDisplayName();
+        var welcomeText = buildWelcomeText();
         var shouldShow = $window.localStorage.getItem(DASHBOARD_WELCOME_KEY) === "1";
         if (!shouldShow) {
             return;
@@ -214,20 +288,18 @@
         $window.localStorage.removeItem(DASHBOARD_WELCOME_KEY);
         $scope.welcomeAlertText = welcomeText;
         $scope.showWelcomeAlert = true;
-
-        if (!speakWelcomeText(welcomeText, function(){
-            queueWelcomeSpeechOnFirstGesture(welcomeText);
-        })) {
-            queueWelcomeSpeechOnFirstGesture(welcomeText);
-        }
-
-        $timeout(function(){
-            $scope.showWelcomeAlert = false;
-        }, 3500);
+        queueWelcomeSpeechOnFirstGesture(welcomeText);
+        speakKhmerNow(welcomeText);
     }
 
     $scope.dismissWelcomeAlert = function(){
+        clearWelcomeSpeechGestureHandler();
         $scope.showWelcomeAlert = false;
+    };
+
+    $scope.speakWelcomeNow = function(){
+        var text = $scope.welcomeAlertText || buildWelcomeText();
+        speakKhmerNow(text);
     };
 
     function getSlideCount(){
