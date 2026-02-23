@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.32/angular-route.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="app.js"></script>
     <script src="services/employeeService.js"></script>
+    <script src="controllers/dashboardController.js"></script>
     <script src="controllers/employeeController.js"></script>
     <link rel="icon" type="image/png" href="images/usea.png">
     <title>USEA</title>
@@ -14,7 +16,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
-        
+
         body {
             font-family: 'Khmer OS Siemreap', sans-serif;
             background-color: #f4f6f9;
@@ -49,9 +51,11 @@
                 margin-left: -250px;
                 position: fixed;
             }
+
             body.sidebar-open .sidebar {
                 margin-left: 0;
             }
+
             .main-content {
                 margin-left: 0 !important;
             }
@@ -62,8 +66,9 @@
             transition: all 0.2s;
         }
 
-        .nav-link:hover, .nav-link.active {
-            background-color: rgba(255,255,255,.1);
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, .1);
             color: #fff;
         }
 
@@ -84,7 +89,7 @@
         }
 
         .card {
-            box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
             border-top: 3px solid #007bff;
         }
 
@@ -99,9 +104,10 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1039;
         }
+
         body.sidebar-open #sidebar-overlay {
             display: block;
         }
@@ -111,15 +117,19 @@
     <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar fixed h-full flex flex-col text-sm">
         <div class="px-4 py-3.5 border-b border-gray-700/80 bg-white/[0.02] flex items-center gap-3">
-            <img src="images/usea.png" alt="Admin Logo" class="w-9 h-9 rounded-md object-cover shrink-0 ring-1 ring-white/20">
+            <img src="images/usea.png" alt="Admin Logo"
+                class="w-9 h-9 rounded-md object-cover shrink-0 ring-1 ring-white/20">
             <div class="min-w-0 leading-tight">
                 <p class="text-white text-base font-semibold tracking-[0.12em] uppercase truncate">USEA</p>
                 <p class="text-gray-400 text-[11px] truncate">ផ្ទាំងគ្រប់គ្រងធនធានមនុស្ស</p>
             </div>
         </div>
-        
+
         <div class="p-4 overflow-y-auto flex-1">
             <nav class="space-y-1">
+                <a href="#/dashboard" class="nav-link flex items-center gap-3 px-3 py-2 rounded" data-nav="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4" style="stroke-width: 2.5;"></i> ផ្ទាំងដើម
+                </a>
                 <a href="#/employees" class="nav-link flex items-center gap-3 px-3 py-2 rounded" data-nav="employees">
                     <i data-lucide="users" class="w-4 h-4" style="stroke-width: 2.5;"></i> ការជ្រើសរើសបុគ្គលិក
                 </a>
@@ -144,13 +154,15 @@
         </header>
         <div class="p-6 flex-1">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" ng-view>
-                
+
             </div>
         </div>
 
         <footer class="main-footer flex flex-col sm:flex-row justify-between items-center text-sm">
             <div class="text-center sm:text-left mb-2 sm:mb-0">
-                <strong>រក្សាសិទ្ធិ &copy; ២០២៥ - ២០២៦ <a href="https://www.usea.edu.kh/" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">USEA</a>.</strong> រក្សាសិទ្ធិគ្រប់យ៉ាង.
+                <strong>រក្សាសិទ្ធិ &copy; ២០២៥ - ២០២៦ <a href="https://www.usea.edu.kh/" target="_blank"
+                        rel="noopener noreferrer" class="text-blue-500 hover:underline">USEA</a>.</strong>
+                រក្សាសិទ្ធិគ្រប់យ៉ាង.
             </div>
             <div class="text-center sm:text-right">
                 <b class="ml-2">កំណែ</b> ៣.២.០
@@ -193,13 +205,13 @@
             const badge = document.getElementById('active-tag-badge');
             const label = document.getElementById('input-label');
             const title = document.getElementById('card-title');
-            
+
             container.style.opacity = '0';
 
             setTimeout(() => {
                 let newHtml = '';
-                
-                switch(type) {
+
+                switch (type) {
                     case 'input':
                         newHtml = `<input type="text" id="main-input" placeholder="Enter your full name..." 
                                    class="w-full px-3 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-sm">`;
@@ -249,7 +261,7 @@
             const element = document.getElementById('main-input');
             const outputBox = document.getElementById('output-box');
             const resultText = document.getElementById('result-text');
-            
+
             if (!element.value || element.value.trim() === "") {
                 outputBox.classList.remove('bg-green-100', 'border-green-500', 'text-green-700');
                 outputBox.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
@@ -276,9 +288,15 @@
         }
 
         function syncActiveSidebarByHash() {
-            const hash = window.location.hash || '#/employees';
+            const hash = window.location.hash || '#/dashboard';
+            const dashboardLink = document.querySelector('.sidebar .nav-link[data-nav="dashboard"]');
             const employeeLink = document.querySelector('.sidebar .nav-link[data-nav="employees"]');
             const logoutLink = document.querySelector('.sidebar .nav-link[data-nav="logout"]');
+
+            if (hash.indexOf('#/dashboard') === 0) {
+                setActiveSidebarLink(dashboardLink);
+                return;
+            }
 
             if (hash.indexOf('#/employees') === 0) {
                 setActiveSidebarLink(employeeLink);
@@ -313,8 +331,58 @@
             }
         });
         updateActiveState('input');
+
+        document.addEventListener("click", async function (e) {
+            const logoutLink = e.target.closest('[data-nav="logout"]');
+            if (!logoutLink) return;
+
+            e.preventDefault();
+
+            const token = localStorage.getItem("auth_token");
+            const apiUrl = "http://127.0.0.1:8000/api/logout";
+
+            try {
+                if (token) {
+                    await fetch(apiUrl, {
+                        method: "POST",
+                        headers: {
+                            "Accept": "application/json",
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        }
+                    });
+                }
+            } finally {
+                localStorage.removeItem("auth_token");
+                localStorage.removeItem("token_type");
+                localStorage.removeItem("auth_user");
+                window.location.href = "login.html";
+            }
+        });
+
+        (async function () {
+            const token = localStorage.getItem("auth_token");
+            if (!token) {
+                window.location.replace("login.html");
+                return;
+            }
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/api/me", {
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": "Bearer " + token
+                    }
+                });
+
+                if (!res.ok) throw new Error();
+            } catch {
+                localStorage.removeItem("auth_token");
+                localStorage.removeItem("token_type");
+                localStorage.removeItem("auth_user");
+                window.location.replace("login.html");
+            }
+        })();
     </script>
 </body>
 </html>
-
-

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" ng-app="loginApp">
 <head>
     <meta charset="UTF-8">
@@ -93,7 +93,7 @@
         .card {
             background: var(--card-bg);
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 5px;
         }
 
         .shadow-lg {
@@ -103,7 +103,7 @@
         .login-card,
         .login-card .form-control,
         .login-card .btn {
-            border-radius: 6px;
+            border-radius: 4px;
         }
 
         .login-card {
@@ -137,6 +137,7 @@
 
         .form-control {
             width: 100%;
+            font-family: "Khmer OS Siemreap", sans-serif;
             border: 1px solid var(--border);
             background: #fff;
             color: var(--text);
@@ -308,39 +309,79 @@
         </div>
     </div>
 
-    <script>
-        (function() {
-            if (!window.angular) {
-                return;
-            }
+   <script>
+(function () {
+    if (!window.angular) return;
 
-            angular.module("loginApp", [])
-                .controller("LoginCtrl", ["$timeout", function($timeout) {
-                    var vm = this;
-                    vm.username = "";
-                    vm.password = "";
-                    vm.showPassword = false;
+    angular.module("loginApp", [])
+        .controller("LoginCtrl", ["$http", "$timeout", "$window", function ($http, $timeout, $window) {
+            var LOGIN_API = "http://127.0.0.1:8000/api/login";
+
+            var vm = this;
+            vm.username = "";
+            vm.password = "";
+            vm.showPassword = false;
+            vm.isSubmitting = false;
+            vm.message = "";
+
+            vm.togglePassword = function () {
+                vm.showPassword = !vm.showPassword;
+            };
+
+            vm.signIn = function (form) {
+                if (!form || form.$invalid) return;
+
+                vm.isSubmitting = true;
+                vm.message = "កំពុងចូលប្រព័ន្ធ...";
+
+                $http({
+                    method: "POST",
+                    url: LOGIN_API,
+                    data: {
+                        username: String(vm.username || "").trim(),
+                        password: String(vm.password || "")
+                    },
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(function (response) {
+                    var data = response.data || {};
+
+                    if (!data.token) {
+                        vm.message = "ចូលប្រព័ន្ធបរាជ័យ";
+                        return;
+                    }
+
+                    $window.localStorage.setItem("auth_token", data.token);
+                    $window.localStorage.setItem("token_type", data.token_type || "Bearer");
+                    if (data.user) {
+                        $window.localStorage.setItem("auth_user", JSON.stringify(data.user));
+                    }
+                    $window.localStorage.setItem("show_dashboard_welcome", "1");
+
+                    vm.message = "ចូលប្រព័ន្ធជោគជ័យ";
+                    $timeout(function () {
+                        $window.location.href = "index.html";
+                    }, 400);
+                })
+                .catch(function (error) {
+                    if (error.status === 401) {
+                        vm.message = "ឈ្មោះអ្នកប្រើ ឬ លេខសម្ងាត់មិនត្រឹមត្រូវ";
+                    } else if (error.status === 422) {
+                        vm.message = "សូមបញ្ចូលឈ្មោះ និង លេខសម្ងាត់";
+                    } else {
+                        vm.message = "មិនអាចភ្ជាប់ទៅ API បាន";
+                    }
+                })
+                .finally(function () {
                     vm.isSubmitting = false;
-                    vm.message = "";
+                });
+            };
+        }]);
+})();
+</script>
 
-                    vm.togglePassword = function() {
-                        vm.showPassword = !vm.showPassword;
-                    };
-
-                    vm.signIn = function(form) {
-                        if (!form || form.$invalid) {
-                            return;
-                        }
-
-                        vm.isSubmitting = true;
-                        vm.message = "កំពុងចូលប្រព័ន្ធ...";
-
-                        $timeout(function() {
-                            vm.isSubmitting = false;
-                        }, 600);
-                    };
-                }]);
-        })();
-    </script>
 </body>
 </html>

@@ -3,6 +3,10 @@ var app = angular.module("hrApp", ["ngRoute"]);
 app.config(function($routeProvider){
 
     $routeProvider
+    .when("/dashboard", {
+        templateUrl: "views/dashboard.html?v=20260223",
+        controller: "DashboardController"
+    })
     .when("/employees", {
         templateUrl: "views/list.html?v=20260221",
         controller: "EmployeeController"
@@ -12,7 +16,7 @@ app.config(function($routeProvider){
         controller: "EmployeeController"
     })
     .otherwise({
-        redirectTo: "/employees"
+        redirectTo: "/dashboard"
     });
 
 });
